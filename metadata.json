@@ -1,0 +1,6 @@
+{
+  "name": "Natasha Akpoti-Uduaghan Public Portal",
+  "description": "Public information portal for Senator Natasha Akpoti-Uduaghan (Kogi Central), featuring biography, parliamentary record, 2027 election informational updates, live countdown, and source verification.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
