@@ -52,48 +52,73 @@ interface PortalDataState {
 
 const PortalDataContext = createContext<PortalDataState | undefined>(undefined);
 
-const LOCAL_STORAGE_KEY = 'kogi_central_portal_data_v2';
+const LOCAL_STORAGE_KEY = 'kogi_central_portal_data_v3';
+const LEGACY_STORAGE_KEY_V2 = 'kogi_central_portal_data_v2';
 
 export const PortalDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [profile, setProfile] = useState(SENATOR_PROFILE);
-  const [bioMilestones, setBioMilestones] = useState<BioMilestone[]>(BIO_MILESTONES);
-  const [bills, setBills] = useState<LegislativeBill[]>(LEGISLATIVE_BILLS);
-  const [projects, setProjects] = useState<ConstituencyProject[]>(CONSTITUENCY_PROJECTS);
-  const [news, setNews] = useState<NewsArticle[]>(NEWS_ARTICLES);
-  const [sources, setSources] = useState<VerifiedSource[]>(VERIFIED_SOURCES);
-  const [lgas, setLgas] = useState<LGADetail[]>(LGA_DETAILS);
-  const [isAdminOpen, setIsAdminOpen] = useState(false);
-
-  // Hydrate from localStorage on initial load
-  useEffect(() => {
+  // Helper to read initial stored data safely with migration from v2 if available
+  const getInitialData = () => {
+    if (typeof window === 'undefined') return null;
     try {
-      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.profile) setProfile(parsed.profile);
-        if (parsed.bioMilestones) setBioMilestones(parsed.bioMilestones);
-        if (parsed.bills) setBills(parsed.bills);
-        if (parsed.projects) setProjects(parsed.projects);
-        if (parsed.news) setNews(parsed.news);
-        if (parsed.sources) setSources(parsed.sources);
-        if (parsed.lgas) setLgas(parsed.lgas);
+      const savedV3 = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (savedV3) {
+        return JSON.parse(savedV3);
+      }
+      const savedV2 = localStorage.getItem(LEGACY_STORAGE_KEY_V2);
+      if (savedV2) {
+        const parsedV2 = JSON.parse(savedV2);
+        // Merge projects: keep user-added projects or updates from v2, ensuring all new default projects from v3 are present
+        let mergedProjects = CONSTITUENCY_PROJECTS;
+        if (Array.isArray(parsedV2.projects)) {
+          const defaultIds = new Set(CONSTITUENCY_PROJECTS.map(p => p.id));
+          const customProjects = parsedV2.projects.filter((p: ConstituencyProject) => !defaultIds.has(p.id));
+          const userModifiedDefaultsMap = new Map<string, ConstituencyProject>();
+          parsedV2.projects.forEach((p: ConstituencyProject) => {
+            if (defaultIds.has(p.id)) {
+              userModifiedDefaultsMap.set(p.id, p);
+            }
+          });
+          mergedProjects = [
+            ...CONSTITUENCY_PROJECTS.map(p => userModifiedDefaultsMap.get(p.id) || p),
+            ...customProjects,
+          ];
+        }
+        const migrated = {
+          profile: parsedV2.profile || SENATOR_PROFILE,
+          bioMilestones: parsedV2.bioMilestones || BIO_MILESTONES,
+          bills: parsedV2.bills || LEGISLATIVE_BILLS,
+          projects: mergedProjects,
+          news: parsedV2.news || NEWS_ARTICLES,
+          sources: parsedV2.sources || VERIFIED_SOURCES,
+          lgas: parsedV2.lgas || LGA_DETAILS,
+        };
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(migrated));
+        return migrated;
       }
     } catch (e) {
       console.error('Failed to load portal data from localStorage', e);
     }
-  }, []);
+    return null;
+  };
 
-  // Sync hash #admin
+  const initialData = getInitialData();
+
+  const [profile, setProfile] = useState<typeof SENATOR_PROFILE>(() => initialData?.profile || SENATOR_PROFILE);
+  const [bioMilestones, setBioMilestones] = useState<BioMilestone[]>(() => initialData?.bioMilestones || BIO_MILESTONES);
+  const [bills, setBills] = useState<LegislativeBill[]>(() => initialData?.bills || LEGISLATIVE_BILLS);
+  const [projects, setProjects] = useState<ConstituencyProject[]>(() => initialData?.projects || CONSTITUENCY_PROJECTS);
+  const [news, setNews] = useState<NewsArticle[]>(() => initialData?.news || NEWS_ARTICLES);
+  const [sources, setSources] = useState<VerifiedSource[]>(() => initialData?.sources || VERIFIED_SOURCES);
+  const [lgas, setLgas] = useState<LGADetail[]>(() => initialData?.lgas || LGA_DETAILS);
+  const [isAdminOpen, setIsAdminOpen] = useState(() => typeof window !== 'undefined' && window.location.hash === '#admin');
+
+  // Sync hash #admin changes
   useEffect(() => {
     const handleHashChange = () => {
       if (window.location.hash === '#admin') {
         setIsAdminOpen(true);
       }
     };
-
-    if (window.location.hash === '#admin') {
-      setIsAdminOpen(true);
-    }
 
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
@@ -256,6 +281,7 @@ export const PortalDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setSources(VERIFIED_SOURCES);
     setLgas(LGA_DETAILS);
     localStorage.removeItem(LOCAL_STORAGE_KEY);
+    localStorage.removeItem(LEGACY_STORAGE_KEY_V2);
   };
 
   return (

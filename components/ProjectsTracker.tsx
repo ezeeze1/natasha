@@ -12,7 +12,8 @@ import {
   Filter, 
   BarChart3, 
   Sparkles,
-  ExternalLink
+  ExternalLink,
+  Calendar
 } from 'lucide-react';
 import { motion } from 'motion/react';
 
@@ -20,21 +21,27 @@ export const ProjectsTracker: React.FC = () => {
   const { projects } = usePortalData();
   const [selectedLga, setSelectedLga] = useState<string>('All');
   const [selectedSector, setSelectedSector] = useState<string>('All');
+  const [selectedYear, setSelectedYear] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeProject, setActiveProject] = useState<ConstituencyProject | null>(null);
 
   const lgaList = ['All', 'District Wide', 'Adavi', 'Ajaokuta', 'Ogori-Magongo', 'Okehi', 'Okene'];
   const sectorList = ['All', 'Healthcare', 'Education', 'Power & Energy', 'Water & Sanitation', 'Roads & Infrastructure', 'Empowerment'];
+  const yearList = ['All', '2026', '2025', '2024', 'Legacy / Earlier'];
 
   const filteredProjects = projects.filter((proj) => {
     const matchesLga = selectedLga === 'All' || proj.lga === selectedLga;
     const matchesSector = selectedSector === 'All' || proj.sector === selectedSector;
+    const matchesYear = 
+      selectedYear === 'All' || 
+      (selectedYear === 'Legacy / Earlier' ? !proj.year : proj.year === Number(selectedYear));
     const matchesSearch = 
       proj.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       proj.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      proj.lga.toLowerCase().includes(searchQuery.toLowerCase());
+      proj.lga.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (proj.source && proj.source.toLowerCase().includes(searchQuery.toLowerCase()));
 
-    return matchesLga && matchesSector && matchesSearch;
+    return matchesLga && matchesSector && matchesYear && matchesSearch;
   });
 
   return (
@@ -59,7 +66,7 @@ export const ProjectsTracker: React.FC = () => {
 
         {/* Filter Controls Bar */}
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs mb-8 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             
             {/* Search Input */}
             <div className="relative">
@@ -68,7 +75,7 @@ export const ProjectsTracker: React.FC = () => {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search projects by keyword..."
+                placeholder="Search projects..."
                 className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:bg-white"
               />
             </div>
@@ -101,6 +108,20 @@ export const ProjectsTracker: React.FC = () => {
               </select>
             </div>
 
+            {/* Year Selector */}
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-emerald-700 shrink-0" />
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(e.target.value)}
+                className="w-full py-2 px-3 text-xs rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-700"
+              >
+                {yearList.map((yr) => (
+                  <option key={yr} value={yr}>Year: {yr}</option>
+                ))}
+              </select>
+            </div>
+
           </div>
 
           <div className="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
@@ -109,6 +130,7 @@ export const ProjectsTracker: React.FC = () => {
               onClick={() => {
                 setSelectedLga('All');
                 setSelectedSector('All');
+                setSelectedYear('All');
                 setSearchQuery('');
               }}
               className="text-emerald-800 font-semibold hover:underline"
@@ -147,10 +169,17 @@ export const ProjectsTracker: React.FC = () => {
                   {proj.title}
                 </h3>
 
-                {/* Sector Badge */}
-                <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
-                  {proj.sector}
-                </span>
+                {/* Sector & Year Badges */}
+                <div className="flex items-center gap-2">
+                  <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                    {proj.sector}
+                  </span>
+                  {proj.year && (
+                    <span className="inline-block text-[10px] font-bold text-emerald-800 bg-emerald-100/70 px-2 py-0.5 rounded">
+                      {proj.year}
+                    </span>
+                  )}
+                </div>
 
                 {/* Description */}
                 <p className="text-xs text-slate-600 line-clamp-3 leading-relaxed">
@@ -217,14 +246,29 @@ export const ProjectsTracker: React.FC = () => {
               </button>
             </div>
 
-            <div>
-              <span className="text-[10px] font-bold uppercase bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded">
-                {activeProject.sector}
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <span className="text-[10px] font-bold uppercase bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded mr-2">
+                  {activeProject.sector}
+                </span>
+                {activeProject.year && (
+                  <span className="text-[10px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded">
+                    Year: {activeProject.year}
+                  </span>
+                )}
+              </div>
+              <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
+                activeProject.status === 'Completed'
+                  ? 'bg-emerald-100 text-emerald-900 border border-emerald-300'
+                  : 'bg-amber-100 text-amber-900 border border-amber-300'
+              }`}>
+                {activeProject.status}
               </span>
-              <h3 className="font-serif font-bold text-xl text-slate-900 mt-2">
-                {activeProject.title}
-              </h3>
             </div>
+
+            <h3 className="font-serif font-bold text-xl text-slate-900 mt-1">
+              {activeProject.title}
+            </h3>
 
             <div className="space-y-3 text-xs text-slate-700">
               <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
@@ -236,10 +280,29 @@ export const ProjectsTracker: React.FC = () => {
                 <span className="font-bold uppercase text-[10px] text-emerald-700">Constituency Benefit</span>
                 <p className="leading-relaxed font-semibold">{activeProject.impactMetric}</p>
               </div>
+
+              {activeProject.source && (
+                <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 flex items-center justify-between">
+                  <span className="font-bold uppercase text-[10px] text-slate-500">Reported Source / Verifiability</span>
+                  {activeProject.sourceUrl ? (
+                    <a
+                      href={activeProject.sourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-emerald-800 font-semibold hover:underline inline-flex items-center gap-1"
+                    >
+                      <span>{activeProject.source}</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  ) : (
+                    <span className="text-slate-700 font-medium">{activeProject.source}</span>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="pt-3 border-t border-slate-200 flex justify-between items-center text-xs">
-              <span className="text-slate-500">Status: <b>{activeProject.status} ({activeProject.progressPercentage}%)</b></span>
+              <span className="text-slate-500">Progress: <b>{activeProject.progressPercentage}% ({activeProject.completionDate})</b></span>
               <button
                 onClick={() => setActiveProject(null)}
                 className="bg-emerald-800 hover:bg-emerald-900 text-white font-semibold px-4 py-2 rounded-lg"

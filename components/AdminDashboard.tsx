@@ -51,7 +51,7 @@ export const AdminDashboard: React.FC = () => {
   } = usePortalData();
 
   // Auth State
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => typeof window !== 'undefined' && sessionStorage.getItem('admin_authenticated') === 'true');
   const [usernameInput, setUsernameInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
   const [authError, setAuthError] = useState('');
@@ -64,24 +64,18 @@ export const AdminDashboard: React.FC = () => {
 
   // Local Profile Form State
   const [profileForm, setProfileForm] = useState(profile);
+  const [prevProfile, setPrevProfile] = useState(profile);
+
+  if (profile !== prevProfile) {
+    setPrevProfile(profile);
+    setProfileForm(profile);
+  }
 
   // New Items Modal States
   const [editingBill, setEditingBill] = useState<any | null>(null);
   const [editingProject, setEditingProject] = useState<any | null>(null);
   const [editingNews, setEditingNews] = useState<any | null>(null);
   const [editingBio, setEditingBio] = useState<any | null>(null);
-
-  // Check sessionStorage on mount
-  useEffect(() => {
-    const sessionAuth = sessionStorage.getItem('admin_authenticated');
-    if (sessionAuth === 'true') {
-      setIsAuthenticated(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    setProfileForm(profile);
-  }, [profile]);
 
   if (!isAdminOpen) return null;
 
@@ -462,6 +456,11 @@ export const AdminDashboard: React.FC = () => {
                             <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300">
                               {proj.sector}
                             </span>
+                            {proj.year && (
+                              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-800">
+                                {proj.year}
+                              </span>
+                            )}
                             <span className="text-xs font-bold text-emerald-400">
                               {proj.progressPercentage}%
                             </span>
@@ -745,7 +744,7 @@ export const AdminDashboard: React.FC = () => {
       {/* MODAL EDIT PROJECT */}
       {editingProject && (
         <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 text-white rounded-2xl max-w-lg w-full p-6 space-y-4">
+          <div className="bg-slate-900 border border-slate-700 text-white rounded-2xl max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             <h3 className="font-bold text-base">{editingProject.id ? 'Edit Project' : 'Add New Project'}</h3>
             <div className="space-y-3 text-xs">
               <div>
@@ -774,11 +773,61 @@ export const AdminDashboard: React.FC = () => {
                   </select>
                 </div>
                 <div>
+                  <label className="block font-semibold mb-1">Sector</label>
+                  <select
+                    value={editingProject.sector || 'Healthcare'}
+                    onChange={(e) => setEditingProject({ ...editingProject, sector: e.target.value as any })}
+                    className="w-full p-2 rounded bg-slate-950 border border-slate-700 text-white"
+                  >
+                    <option value="Healthcare">Healthcare</option>
+                    <option value="Education">Education</option>
+                    <option value="Power & Energy">Power & Energy</option>
+                    <option value="Water & Sanitation">Water & Sanitation</option>
+                    <option value="Roads & Infrastructure">Roads & Infrastructure</option>
+                    <option value="Empowerment">Empowerment</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block font-semibold mb-1">Status</label>
+                  <select
+                    value={editingProject.status || 'Ongoing'}
+                    onChange={(e) => setEditingProject({ ...editingProject, status: e.target.value as any })}
+                    className="w-full p-2 rounded bg-slate-950 border border-slate-700 text-white"
+                  >
+                    <option value="Completed">Completed</option>
+                    <option value="Ongoing">Ongoing</option>
+                    <option value="Approved / In Procurement">Approved / In Procurement</option>
+                  </select>
+                </div>
+                <div>
                   <label className="block font-semibold mb-1">Progress %</label>
                   <input
                     type="number"
                     value={editingProject.progressPercentage}
                     onChange={(e) => setEditingProject({ ...editingProject, progressPercentage: Number(e.target.value) })}
+                    className="w-full p-2 rounded bg-slate-950 border border-slate-700 text-white"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block font-semibold mb-1">Year (Optional)</label>
+                  <input
+                    type="number"
+                    value={editingProject.year || ''}
+                    onChange={(e) => setEditingProject({ ...editingProject, year: e.target.value ? Number(e.target.value) : undefined })}
+                    placeholder="e.g. 2025"
+                    className="w-full p-2 rounded bg-slate-950 border border-slate-700 text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold mb-1">Target/Completion Date</label>
+                  <input
+                    type="text"
+                    value={editingProject.completionDate || ''}
+                    onChange={(e) => setEditingProject({ ...editingProject, completionDate: e.target.value })}
                     className="w-full p-2 rounded bg-slate-950 border border-slate-700 text-white"
                   />
                 </div>
@@ -791,6 +840,37 @@ export const AdminDashboard: React.FC = () => {
                   onChange={(e) => setEditingProject({ ...editingProject, description: e.target.value })}
                   className="w-full p-2 rounded bg-slate-950 border border-slate-700 text-white"
                 />
+              </div>
+              <div>
+                <label className="block font-semibold mb-1">Impact Metric / Benefit</label>
+                <input
+                  type="text"
+                  value={editingProject.impactMetric || ''}
+                  onChange={(e) => setEditingProject({ ...editingProject, impactMetric: e.target.value })}
+                  className="w-full p-2 rounded bg-slate-950 border border-slate-700 text-white"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block font-semibold mb-1">Source Name (Optional)</label>
+                  <input
+                    type="text"
+                    value={editingProject.source || ''}
+                    onChange={(e) => setEditingProject({ ...editingProject, source: e.target.value })}
+                    placeholder="e.g. Vanguard / THISDAY"
+                    className="w-full p-2 rounded bg-slate-950 border border-slate-700 text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold mb-1">Source URL (Optional)</label>
+                  <input
+                    type="url"
+                    value={editingProject.sourceUrl || ''}
+                    onChange={(e) => setEditingProject({ ...editingProject, sourceUrl: e.target.value })}
+                    placeholder="https://..."
+                    className="w-full p-2 rounded bg-slate-950 border border-slate-700 text-white"
+                  />
+                </div>
               </div>
             </div>
             <div className="flex justify-end gap-2 pt-2">
