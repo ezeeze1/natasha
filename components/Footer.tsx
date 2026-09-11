@@ -110,36 +110,11 @@ export const Footer: React.FC<FooterProps> = ({ onOpenInquiry }) => {
                   Press Statement Archive
                 </a>
               </li>
-              <li>
-                <a href="#sources" className="hover:text-emerald-300 transition-colors">
-                  Verified Public Citations
-                </a>
-              </li>
             </ul>
           </div>
 
           {/* Statutory Links & Action Column */}
           <div className="md:col-span-4 space-y-4">
-            <h4 className="font-serif font-bold text-sm text-white uppercase tracking-wider text-emerald-400">
-              Statutory Verification
-            </h4>
-
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-3.5 space-y-2 text-xs text-slate-300">
-              <div className="flex items-center justify-between">
-                <span className="font-semibold text-white">NASS Profile ID:</span>
-                <span className="font-mono text-emerald-400 font-bold">#624</span>
-              </div>
-              <a
-                href={profile.nassProfileUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-emerald-400 hover:underline flex items-center gap-1 text-[11px]"
-              >
-                <span>National Assembly Official Record</span>
-                <ExternalLink className="w-3 h-3" />
-              </a>
-            </div>
-
             <button
               onClick={onOpenInquiry}
               className="w-full flex items-center justify-center gap-2 bg-emerald-800 hover:bg-emerald-700 text-white font-semibold text-xs py-2.5 rounded-xl transition-all border border-emerald-600"

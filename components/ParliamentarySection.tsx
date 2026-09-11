@@ -212,16 +212,7 @@ export const ParliamentarySection: React.FC = () => {
               </div>
             </div>
 
-            <div className="pt-3 border-t border-slate-200 flex justify-between items-center text-xs">
-              <a
-                href={profile.nassProfileUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-emerald-800 font-semibold hover:underline flex items-center gap-1"
-              >
-                <span>Verify at NASS Portal</span>
-                <ExternalLink className="w-3 h-3" />
-              </a>
+            <div className="pt-3 border-t border-slate-200 flex justify-end items-center text-xs">
               <button
                 onClick={() => setActiveBill(null)}
                 className="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-4 py-2 rounded-lg"

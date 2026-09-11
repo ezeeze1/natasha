@@ -193,10 +193,6 @@ export const BiographySection: React.FC = () => {
 
                 <div className="pt-2 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100">
                   <span>Record Type: Verified Historical Bio</span>
-                  <a href="#sources" className="text-emerald-700 font-semibold hover:underline flex items-center gap-1">
-                    <span>Cross-check Citations</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </a>
                 </div>
               </motion.div>
             </AnimatePresence>

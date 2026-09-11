@@ -11,7 +11,6 @@ import { ProjectsTracker } from '@/components/ProjectsTracker';
 import { ElectionInfoSection } from '@/components/ElectionInfoSection';
 import { NewsSection } from '@/components/NewsSection';
 import { KogiCentralMap } from '@/components/KogiCentralMap';
-import { VerificationSection } from '@/components/VerificationSection';
 import { PublicInquiryModal } from '@/components/PublicInquiryModal';
 import { Footer } from '@/components/Footer';
 import { AdminDashboard } from '@/components/AdminDashboard';
@@ -61,9 +60,6 @@ function MainPortal() {
 
         {/* Kogi Central District 5 LGAs Breakdown */}
         <KogiCentralMap />
-
-        {/* Verified Public Sources & Citations */}
-        <VerificationSection />
       </main>
 
       {/* Footer */}

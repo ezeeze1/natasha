@@ -8,12 +8,10 @@ import {
   Briefcase, 
   Vote, 
   Newspaper, 
-  ShieldCheck, 
   Menu, 
   X, 
   Search, 
-  HelpCircle,
-  ExternalLink
+  HelpCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { usePortalData } from '@/context/PortalDataContext';
@@ -35,14 +33,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenInquiry, searchQuery, setS
     { name: 'Projects Tracker', href: '#projects', icon: Briefcase },
     { name: '2027 Election Info', href: '#election-2027', icon: Vote },
     { name: 'News & Media', href: '#news', icon: Newspaper },
-    { name: 'Verified Sources', href: '#sources', icon: ShieldCheck },
   ];
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-emerald-800/20 shadow-xs transition-all">
       {/* Top Utility Announcement Bar - Full PDP Tri-Color Ribbon */}
       <div className="bg-gradient-to-r from-emerald-800 via-emerald-900 to-red-700 text-white text-xs py-1.5 px-4 shadow-xs">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1.5 bg-emerald-950/80 text-emerald-100 px-2 py-0.5 rounded-full font-bold text-[11px] border border-emerald-400/40 shadow-xs">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -51,25 +48,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenInquiry, searchQuery, setS
             <span className="hidden md:inline text-emerald-100 font-semibold">
               Peoples Democratic Party (PDP) <span className="text-red-300">•</span> Power To The People <span className="text-emerald-300">•</span> 10th National Assembly
             </span>
-          </div>
-
-          <div className="flex items-center gap-3 text-[11px] font-bold">
-            <a 
-              href={profile.nassProfileUrl}
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-red-400 hover:text-red-300 hover:underline flex items-center gap-1"
-            >
-              <span>NASS Profile</span>
-              <ExternalLink className="w-3 h-3 text-red-400" />
-            </a>
-            <span className="text-red-500 font-extrabold">|</span>
-            <a 
-              href="#sources" 
-              className="text-red-400 hover:text-red-300 hover:underline"
-            >
-              Citations
-            </a>
           </div>
         </div>
       </div>

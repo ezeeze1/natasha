@@ -124,22 +124,6 @@ export const Hero: React.FC<HeroProps> = ({ onExploreProjects }) => {
                 <ArrowRight className="w-4 h-4 text-emerald-400" />
               </a>
             </div>
-
-            {/* Verified Profile Link Footer */}
-            <div className="flex items-center gap-2 text-xs text-emerald-200/80 pt-1">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Official NASS Profile Verification ID: <b>624</b></span>
-              <span>•</span>
-              <a 
-                href={profile.nassProfileUrl}
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-emerald-300 hover:text-white underline flex items-center gap-0.5"
-              >
-                <span>Confirm at nass.gov.ng</span>
-                <ExternalLink className="w-3 h-3" />
-              </a>
-            </div>
           </motion.div>
 
           {/* Right Column: Candidate Portrait Frame with PDP Tri-Color Ribbon Frame */}

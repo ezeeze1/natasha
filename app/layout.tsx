@@ -3,7 +3,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Sen. Natasha Akpoti-Uduaghan | Kogi Central Public Portal',
-  description: 'Official public information portal for Senator Natasha Akpoti-Uduaghan (Kogi Central Senatorial District, PDP). Biography, legislative records, constituency projects, 2027 election informational updates, and source verification.',
+  description: 'Official public information portal for Senator Natasha Akpoti-Uduaghan (Kogi Central Senatorial District, PDP). Biography, legislative records, constituency projects, and 2027 election informational updates.',
   keywords: [
     'Natasha Akpoti-Uduaghan',
     'Kogi Central Senator',
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   authors: [{ name: 'Kogi Central Public Information Bureau' }],
   openGraph: {
     title: 'Sen. Natasha Akpoti-Uduaghan | Kogi Central Public Portal',
-    description: 'Official public information portal for Senator Natasha Akpoti-Uduaghan. Public service records, legislative achievements, 2027 election updates, and verified sources.',
+    description: 'Official public information portal for Senator Natasha Akpoti-Uduaghan. Public service records, legislative achievements, and 2027 election updates.',
     type: 'website',
     locale: 'en_NG',
     siteName: 'Natasha Akpoti-Uduaghan Public Portal',
