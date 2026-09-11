@@ -52,28 +52,29 @@ interface PortalDataState {
 
 const PortalDataContext = createContext<PortalDataState | undefined>(undefined);
 
-const LOCAL_STORAGE_KEY = 'kogi_central_portal_data_v3';
+const LOCAL_STORAGE_KEY = 'kogi_central_portal_data_v4';
+const LEGACY_STORAGE_KEY_V3 = 'kogi_central_portal_data_v3';
 const LEGACY_STORAGE_KEY_V2 = 'kogi_central_portal_data_v2';
 
 export const PortalDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Helper to read initial stored data safely with migration from v2 if available
+  // Helper to read initial stored data safely with migration from legacy keys if available
   const getInitialData = () => {
     if (typeof window === 'undefined') return null;
     try {
-      const savedV3 = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (savedV3) {
-        return JSON.parse(savedV3);
+      const savedV4 = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (savedV4) {
+        return JSON.parse(savedV4);
       }
-      const savedV2 = localStorage.getItem(LEGACY_STORAGE_KEY_V2);
-      if (savedV2) {
-        const parsedV2 = JSON.parse(savedV2);
-        // Merge projects: keep user-added projects or updates from v2, ensuring all new default projects from v3 are present
+      const savedV3 = localStorage.getItem(LEGACY_STORAGE_KEY_V3) || localStorage.getItem(LEGACY_STORAGE_KEY_V2);
+      if (savedV3) {
+        const parsedLegacy = JSON.parse(savedV3);
+        // Merge projects
         let mergedProjects = CONSTITUENCY_PROJECTS;
-        if (Array.isArray(parsedV2.projects)) {
+        if (Array.isArray(parsedLegacy.projects)) {
           const defaultIds = new Set(CONSTITUENCY_PROJECTS.map(p => p.id));
-          const customProjects = parsedV2.projects.filter((p: ConstituencyProject) => !defaultIds.has(p.id));
+          const customProjects = parsedLegacy.projects.filter((p: ConstituencyProject) => !defaultIds.has(p.id));
           const userModifiedDefaultsMap = new Map<string, ConstituencyProject>();
-          parsedV2.projects.forEach((p: ConstituencyProject) => {
+          parsedLegacy.projects.forEach((p: ConstituencyProject) => {
             if (defaultIds.has(p.id)) {
               userModifiedDefaultsMap.set(p.id, p);
             }
@@ -83,14 +84,26 @@ export const PortalDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             ...customProjects,
           ];
         }
+
+        // Check if profile/bioMilestones still contain Calabar in legacy data and upgrade them to current SENATOR_PROFILE / BIO_MILESTONES
+        let profileToUse = parsedLegacy.profile || SENATOR_PROFILE;
+        if (JSON.stringify(profileToUse).includes('Calabar')) {
+          profileToUse = SENATOR_PROFILE;
+        }
+
+        let bioMilestonesToUse = parsedLegacy.bioMilestones || BIO_MILESTONES;
+        if (JSON.stringify(bioMilestonesToUse).includes('Calabar')) {
+          bioMilestonesToUse = BIO_MILESTONES;
+        }
+
         const migrated = {
-          profile: parsedV2.profile || SENATOR_PROFILE,
-          bioMilestones: parsedV2.bioMilestones || BIO_MILESTONES,
-          bills: parsedV2.bills || LEGISLATIVE_BILLS,
+          profile: profileToUse,
+          bioMilestones: bioMilestonesToUse,
+          bills: parsedLegacy.bills || LEGISLATIVE_BILLS,
           projects: mergedProjects,
-          news: parsedV2.news || NEWS_ARTICLES,
-          sources: parsedV2.sources || VERIFIED_SOURCES,
-          lgas: parsedV2.lgas || LGA_DETAILS,
+          news: parsedLegacy.news || NEWS_ARTICLES,
+          sources: parsedLegacy.sources || VERIFIED_SOURCES,
+          lgas: parsedLegacy.lgas || LGA_DETAILS,
         };
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(migrated));
         return migrated;
@@ -281,6 +294,7 @@ export const PortalDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setSources(VERIFIED_SOURCES);
     setLgas(LGA_DETAILS);
     localStorage.removeItem(LOCAL_STORAGE_KEY);
+    localStorage.removeItem(LEGACY_STORAGE_KEY_V3);
     localStorage.removeItem(LEGACY_STORAGE_KEY_V2);
   };
 

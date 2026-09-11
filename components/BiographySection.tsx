@@ -73,7 +73,7 @@ export const BiographySection: React.FC = () => {
           </div>
           <div className="space-y-1">
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Education</span>
-            <div className="text-sm font-semibold text-slate-900">LL.B (Calabar) • LL.M (Dundee, Scotland)</div>
+            <div className="text-sm font-semibold text-slate-900">LL.B (Abuja) • LL.M (Dundee, Scotland)</div>
           </div>
           <div className="space-y-1">
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Senatorial District</span>
